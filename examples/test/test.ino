@@ -18,7 +18,7 @@
   */
 //---------------------------------------------------------
 
-// The 8 bit data bus is connected to PORTD[7..0]
+// The 8 bit data bus is connected to PORTD[27..34]
 
 #define   SDI_PIN    6    // SDI (serial mode) signal connected to pin 6
 #define   SCL_PIN    7    // SCL (serial mdoe) signal connected to pin 7
@@ -27,12 +27,12 @@
 #define    WR_PIN    9    // /WR (8080 mode) signal connected to pin 9
 #define     E_PIN   10    // E (6800 mode) signal connected to pin 10
 #define    RD_PIN   10    // /RD (8080 mode) signal connected to pin 10
-#define   RES_PIN   11    // /RES signal connected to pin 11
-#define    CS_PIN   12    // /CS signal connected to pin 12
-#define    PS_PIN   A0    // PS signal connected to pin A0
-#define   CPU_PIN   A1    // CPU signal connected to pin A1
-#define   LVL_DIR   A2    // DIR (direction control) signal of level shifter IC connected to pin A2
-#define   LVL_OEN   A3    // /OE (output enable) signal of level shifter IC connected to pin A3
+#define   RES_PIN   15    // /RES signal connected to pin 15
+#define    CS_PIN   16    // /CS signal connected to pin 16
+#define    PS_PIN   25    // PS signal connected to pin A0
+#define   CPU_PIN   24    // CPU signal connected to pin A1
+//#define   LVL_DIR   34    // DIR (direction control) signal of level shifter IC connected to pin A2
+//#define   LVL_OEN   35    // /OE (output enable) signal of level shifter IC connected to pin A3
 
 #define    RED  0x0000FF
 #define  GREEN  0x00FF00
@@ -40,12 +40,22 @@
 #define  WHITE  0xFFFFFF
 #define  BLACK  0x000000
 
+#define   PORTD0    27    // PORTD 0 in UNO R3 mapped to pin 27 in sipeed maix bit
+#define   PORTD1    28    // PORTD 1 in UNO R3 mapped to pin 28 in sipeed maix bit
+#define   PORTD2    29    // PORTD 2 in UNO R3 mapped to pin 29 in sipeed maix bit
+#define   PORTD3    30    // PORTD 3 in UNO R3 mapped to pin 30 in sipeed maix bit
+#define   PORTD4    31    // PORTD 4 in UNO R3 mapped to pin 31 in sipeed maix bit
+#define   PORTD5    32    // PORTD 5 in UNO R3 mapped to pin 32 in sipeed maix bit
+#define   PORTD6    33    // PORTD 6 in UNO R3 mapped to pin 33 in sipeed maix bit
+#define   PORTD7    34    // PORTD 7 in UNO R3 mapped to pin 34 in sipeed maix bit
 
 /*********************************/
 /****** INTERFACE SELECTION ******/
 /*********************************/
 
 const unsigned char interface = 1;    // 0 = 8-bit parallel (6800 mode) interface; 1 = 8-bit parallel (8080 mode) interface; 2 = 4-wire SPI interface
+
+const unsigned char one = 0x01;
 
 /*===============================*/
 /*===============================*/
@@ -400,7 +410,8 @@ void OLED_Command_160128RGB(unsigned char c)        // send command to OLED
     {
         case 0:   digitalWrite(CS_PIN, LOW);
             digitalWrite(RS_PIN, LOW);
-            PORTD = c;
+//            PORTD = c;
+            PORTDFunction(c);
             digitalWrite(RW_PIN, LOW);
             digitalWrite(E_PIN, HIGH);
             digitalWrite(E_PIN, LOW);
@@ -409,7 +420,8 @@ void OLED_Command_160128RGB(unsigned char c)        // send command to OLED
         case 1:   digitalWrite(CS_PIN, LOW);
             digitalWrite(RS_PIN, LOW);
             digitalWrite(WR_PIN, HIGH);
-            PORTD = c;
+//            PORTD = c;
+            PORTDFunction(c);
             digitalWrite(WR_PIN, LOW);
             digitalWrite(WR_PIN, HIGH);
             digitalWrite(CS_PIN, HIGH);
@@ -445,7 +457,8 @@ void OLED_Data_160128RGB(unsigned char d)        // send data to OLED
     {
         case 0:   digitalWrite(CS_PIN, LOW);
             digitalWrite(RS_PIN, HIGH);
-            PORTD = d;
+//            PORTD = d;
+            PORTDFunction(d);
             digitalWrite(RW_PIN, LOW);
             digitalWrite(E_PIN, HIGH);
             digitalWrite(E_PIN, LOW);
@@ -454,7 +467,8 @@ void OLED_Data_160128RGB(unsigned char d)        // send data to OLED
         case 1:   digitalWrite(CS_PIN, LOW);
             digitalWrite(RS_PIN, HIGH);
             digitalWrite(WR_PIN, HIGH);
-            PORTD = d;
+//            PORTD = d;
+            PORTDFunction(d);
             digitalWrite(WR_PIN, LOW);
             digitalWrite(WR_PIN, HIGH);
             digitalWrite(CS_PIN, HIGH);
@@ -1184,19 +1198,89 @@ void OLED_Init_160128RGB(void)      //OLED initialization
 /*============= END =============*/
 /*===============================*/
 
+
+/*===============================*/
+/*======= DDRD ========*/
+/*==== pseudo function =============*/
+/*===============================*/
+
+void set_DDRD(){
+  pinMode(PORTD0, OUTPUT);                        // configure PORTD pins as output
+  pinMode(PORTD1, OUTPUT);                        // configure PORTD pins as output
+  pinMode(PORTD2, OUTPUT);                        // configure PORTD pins as output
+  pinMode(PORTD3, OUTPUT);                        // configure PORTD pins as output
+  pinMode(PORTD4, OUTPUT);                        // configure PORTD pins as output
+  pinMode(PORTD5, OUTPUT);                        // configure PORTD pins as output
+  pinMode(PORTD6, OUTPUT);                        // configure PORTD pins as output
+  pinMode(PORTD7, OUTPUT);                        // configure PORTD pins as output
+}
+
+
+/*===============================*/
+/*======= PORTRD ========*/
+/*=== pseudo function =============*/
+/*===============================*/
+
+void PORTDFunction(unsigned char c){
+// shift right 7 times and with 0x01
+  if ((c & one)==1){
+    digitalWrite(PORTD0, HIGH);
+  } else{
+    digitalWrite(PORTD0, LOW);
+  }
+  if (((c>>1) & one)==1){
+    digitalWrite(PORTD1, HIGH);
+  } else{
+    digitalWrite(PORTD1, LOW);
+  }
+  if (((c>>2) & one)==1){
+    digitalWrite(PORTD2, HIGH);
+  } else{
+    digitalWrite(PORTD2, LOW);
+  }
+  if (((c>>3) & one)==1){
+    digitalWrite(PORTD3, HIGH);
+  } else{
+    digitalWrite(PORTD3, LOW);
+  }
+  if (((c>>4) & one)==1){
+    digitalWrite(PORTD4, HIGH);
+  } else{
+    digitalWrite(PORTD4, LOW);
+  } 
+  if (((c>>5) & one)==1){
+    digitalWrite(PORTD5, HIGH);
+  } else{
+    digitalWrite(PORTD5, LOW);
+  } 
+  if (((c>>6) & one)==1){
+    digitalWrite(PORTD6, HIGH);
+  } else{
+    digitalWrite(PORTD6, LOW);
+  } 
+  if (((c>>7) & one)==1){
+    digitalWrite(PORTD7, HIGH);
+  } else{
+    digitalWrite(PORTD7, LOW);
+  }  
+}
+
+
+
 void setup()                                       // for Arduino, runs first at power on
 {
-    pinMode(LVL_OEN, OUTPUT);                       // configure LVL_OEN as output
-    digitalWrite(LVL_OEN, LOW);
-    pinMode(LVL_DIR, OUTPUT);                       // configure LVL_DIR as output
-    digitalWrite(LVL_DIR, HIGH);
-    DDRD = 0xFF;                                    // configure PORTD as output
+//    pinMode(LVL_OEN, OUTPUT);                       // configure LVL_OEN as output
+//    digitalWrite(LVL_OEN, LOW);
+//    pinMode(LVL_DIR, OUTPUT);                       // configure LVL_DIR as output
+//    digitalWrite(LVL_DIR, HIGH);
+//    DDRD = 0xFF;                                    // configure PORTD as output
+    set_DDRD();                                    // configure PORTD as output
     pinMode(RS_PIN, OUTPUT);                        // configure RS_PIN as output
     pinMode(RES_PIN, OUTPUT);                       // configure RES_PIN as output
     pinMode(CS_PIN, OUTPUT);                        // configure CS_PIN as output
     pinMode(PS_PIN, OUTPUT);                        // configure PS_PIN as output
     pinMode(CPU_PIN, OUTPUT);                       // configure CPU_PIN as output
-    digitalWrite(LVL_OEN, LOW);
+//    digitalWrite(LVL_OEN, LOW);
     digitalWrite(CS_PIN, HIGH);                     // set CS_PIN
     switch(interface)
     {
@@ -1219,7 +1303,8 @@ void setup()                                       // for Arduino, runs first at
         case 2:
             pinMode(SDI_PIN, OUTPUT);                   // configure SDI_PIN as output
             pinMode(SCL_PIN, OUTPUT);                   // configure SCL_PIN as output
-            PORTD = 0x00;                               // reset SDI_PIN and SCL_PIN, ground DB[5..0] of the display
+//            PORTD = 0x00;                               // reset SDI_PIN and SCL_PIN, ground DB[5..0] of the display
+            PORTDFunction(0x00);                               // reset SDI_PIN and SCL_PIN, ground DB[5..0] of the display
             digitalWrite(PS_PIN, LOW);                  // reset PS_PIN
             break;
         default:
@@ -1228,11 +1313,44 @@ void setup()                                       // for Arduino, runs first at
 }
 
 void loop()                                         // main loop, runs after "setup()"
-{
+{   
+//    Serial.println("HERERE");
+////    PORTDFunction(0x00);
+////    PORTDFunction(0x0A);
+////    PORTDFunction(0x0C);
+////    PORTDFunction(0xFF);
+//    digitalWrite(PORTD0, HIGH);
+//    digitalWrite(PORTD1, HIGH);
+//    digitalWrite(PORTD2, HIGH);
+//    digitalWrite(PORTD3, HIGH);
+//    
+//    delay(10);    
+//    
+//    digitalWrite(PORTD0, LOW);
+//    digitalWrite(PORTD1, LOW);
+//    digitalWrite(PORTD2, LOW);
+//    digitalWrite(PORTD3, LOW);
+//
+//    delay(10);
+//
+//    digitalWrite(PORTD0, HIGH);
+//    digitalWrite(PORTD1, HIGH);
+//    digitalWrite(PORTD2, HIGH);
+//    digitalWrite(PORTD3, HIGH);
+//
+//    delay(10);
+//    
+//    digitalWrite(PORTD0, LOW);
+//    digitalWrite(PORTD1, LOW);
+//    digitalWrite(PORTD2, LOW);
+//    digitalWrite(PORTD3, LOW);
+//
+//    delay(10);
+
     OLED_Init_160128RGB();                           // initialize display
-    
+
     OLED_FillScreen_160128RGB(BLACK);                // fill screen with black
-    
+
     OLED_NHDText_160128RGB(GREEN, BLACK);            // show NEWHAVEN DISPLAY
     
     OLED_Text_160128RGB(20, 58, 40, WHITE, BLACK);   // H
